@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="../DTO/DTO.csproj" />
+  <Project Path="../DTOTests/DTOTests.csproj" />
+  <Project Path="../FileVersionComparerApi/FileVersionComparerApi.csproj" Id="2e0019eb-7596-477a-9ea6-26be39f1a169" />
+  <Project Path="../Utils/Utils.csproj" />
+  <Project Path="../UtilsTests/UtilsTests.csproj" />
+  <Project Path="FileVersionComparerApp.csproj" />
+</Solution>

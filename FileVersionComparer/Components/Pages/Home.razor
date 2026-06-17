@@ -1,0 +1,228 @@
+﻿@page "/"
+@using DTO;
+@inject HttpClient Http
+@rendermode InteractiveServer
+
+<PageTitle>Folder Scanner</PageTitle>
+
+<h1>Folder Scanner</h1>
+
+<div class="scanner-grid">
+    <div class="left-column">
+        <div class="panel directory-list">
+            <label class="panel-title">Scanned folders</label>
+            @if (directories == null)
+            {
+                <div class="panel-empty">Loading...</div>
+            }
+            else if (!directories.Any())
+            {
+                <div class="panel-empty">No folders scanned yet</div>
+            }
+            else
+            {
+                <ul class="dir-list">
+                    @foreach (var d in directories)
+                    {
+                        <li class="dir-item" @onclick="() => OnSelectDirectory(d)">@d</li>
+                    }
+                </ul>
+            }
+        </div>
+
+        <div class="panel path-input">
+            <label class="panel-title">Folder path</label>
+            <div class="path-controls">
+                <input class="path-box" placeholder="Enter folder path" @bind="path" />
+                <button class="scan-button" @onclick="ScanNow">Scan</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="middle-column">
+        <div class="panel">
+            <label class="panel-title">New files</label>
+            @if (lastResult?.NewFiles?.Any() != true) { <div class="panel-empty">- none</div> }
+            else
+            {
+                <ul>
+                    @foreach (var f in lastResult.NewFiles)
+                    {
+                        <li>@f.FileName — @f.FileVersion — @f.LastUpdated.ToString("yyyy-MM-dd HH:mm:ss")</li>
+                    }
+                </ul>
+            }
+        </div>
+
+        <div class="panel">
+            <label class="panel-title">Updated files</label>
+            @if (lastResult?.UpdatedFiles?.Any() != true) { <div class="panel-empty">- none</div> }
+            else
+            {
+                <ul>
+                    @foreach (var f in lastResult.UpdatedFiles)
+                    {
+                        <li>@f.FileName — @f.FileVersion — @f.LastUpdated.ToString("yyyy-MM-dd HH:mm:ss")</li>
+                    }
+                </ul>
+            }
+        </div>
+
+        <div class="panel">
+            <label class="panel-title">Deleted files</label>
+            @if (lastResult?.DeletedFiles?.Any() != true) { <div class="panel-empty">- none</div> }
+            else
+            {
+                <ul>
+                    @foreach (var f in lastResult.DeletedFiles)
+                    {
+                        <li>@f.FileName — @f.FileVersion — @f.LastUpdated.ToString("yyyy-MM-dd HH:mm:ss")</li>
+                    }
+                </ul>
+            }
+        </div>
+
+        <div class="panel">
+            <label class="panel-title">Unchanged files</label>
+            @if (lastResult?.UnchangedFiles?.Any() != true) { <div class="panel-empty">- none</div> }
+            else
+            {
+                <ul>
+                    @foreach (var f in lastResult.UnchangedFiles)
+                    {
+                        <li>@f.FileName — @f.FileVersion — @f.LastUpdated.ToString("yyyy-MM-dd HH:mm:ss")</li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+
+    <div class="right-column">
+        <div class="panel">
+            <label class="panel-title">New folders</label>
+            @if (lastResult?.NewDirectories?.Any() != true) { <div class="panel-empty">- none</div> }
+            else
+            {
+                <ul>
+                    @foreach (var d in lastResult.NewDirectories)
+                    {
+                        <li>@d.FileName</li>
+                    }
+                </ul>
+            }
+        </div>
+
+        <div class="panel">
+            <label class="panel-title">Deleted folders</label>
+            @if (lastResult?.DeletedDirectories?.Any() != true) { <div class="panel-empty">- none</div> }
+            else
+            {
+                <ul>
+                    @foreach (var d in lastResult.DeletedDirectories)
+                    {
+                        <li>@d.FileName</li>
+                    }
+                </ul>
+            }
+        </div>
+
+        <div class="panel">
+            <label class="panel-title">Updated folders</label>
+            @if (lastResult?.UpdatedDirectories?.Any() != true) { <div class="panel-empty">- none</div> }
+            else
+            {
+                <ul>
+                    @foreach (var d in lastResult.UpdatedDirectories)
+                    {
+                        <li>@d.FileName</li>
+                    }
+                </ul>
+            }
+        </div>
+
+        <div class="panel">
+            <label class="panel-title">Unchanged folders</label>
+            @if (lastResult?.UnchangedDirectories?.Any() != true) { <div class="panel-empty">- none</div> }
+            else
+            {
+                <ul>
+                    @foreach (var d in lastResult.UnchangedDirectories)
+                    {
+                        <li>@d.FileName</li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+</div>
+
+@if (loading)
+{
+    <div class="loading-overlay">Loading...</div>
+}
+
+@code {
+    private List<string> directories;
+    private string path;
+    private FolderScanResultDTO lastResult;
+    private bool loading = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDirectories();
+    }
+
+    private async Task LoadDirectories()
+    {
+        try
+        {
+            directories = await Http.GetFromJsonAsync<List<string>>("api/FileVersionChecker/directories");
+        }
+        catch
+        {
+            directories = new List<string>();
+        }
+    }
+
+    private async Task OnSelectDirectory(string d)
+    {
+        path = d;
+        await LoadLatestScan();
+    }
+
+    private async Task ScanNow()
+    {
+        if (string.IsNullOrWhiteSpace(path)) return;
+        await ExecuteScan();
+        await LoadDirectories();
+    }
+
+    private async Task GetDataFromApi(string uri)
+    {
+        loading = true;
+        try
+        {
+            lastResult = await Http.GetFromJsonAsync<FolderScanResultDTO>(uri);
+        }
+        catch
+        {
+            lastResult = null;
+        }
+        finally
+        {
+            loading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadLatestScan()
+    {
+        await GetDataFromApi($"api/FileVersionChecker/directories/scan/files/latest?path={Uri.EscapeDataString(path)}");
+    }
+
+    private async Task ExecuteScan()
+    {
+        var uri = $"api/FileVersionChecker/directories/scan/files/execute?path={Uri.EscapeDataString(path)}";
+        await GetDataFromApi(uri);
+    }
+}
