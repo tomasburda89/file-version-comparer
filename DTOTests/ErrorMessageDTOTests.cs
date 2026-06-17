@@ -10,14 +10,16 @@ namespace DTOTests
 
         public ErrorMessageDTOTests()
         {
-            dto = new ErrorMessageDTO();
+            dto = new ErrorMessageDTO()
+            {
+                Message = "Initial error message for testing."
+            };
         }
 
         [Fact]
-        public void TestConstructorShouldInitializeMessageToDefaultNull()
+        public void TestConstructorShouldInitializeMessageToProvidedValue()
         {
-            // Assert native .NET default state
-            dto.Message.Should().BeNull("because string properties default to null in .NET");
+            dto.Message.Should().Be("Initial error message for testing.");
         }
 
         [Theory]

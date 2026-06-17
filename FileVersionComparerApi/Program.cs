@@ -6,8 +6,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 var appSettings = builder.Configuration.GetSection("AppSettings");
-AppConfiguration.SetInstance(appSettings["RecursiveBrowsingDirectory"],
-    appSettings["SnapshotPath"]);
+AppConfiguration.BrowseFolderRecursively = bool.Parse(appSettings["RecursiveBrowsingDirectory"]?.ToLower() ?? "true");
+AppConfiguration.SnapshotDirectoryPath = appSettings["SnapshotPath"] ?? "Data/snapshot.json";
 
 var app = builder.Build();
 

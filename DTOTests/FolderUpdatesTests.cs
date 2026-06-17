@@ -1,5 +1,4 @@
-﻿using Utils;
-using DTO;
+﻿using DTO;
 using FluentAssertions;
 using Xunit;
 
@@ -21,6 +20,10 @@ namespace UtilsTests
             folderUpdates.NewFiles.Should().NotBeNull().And.BeEmpty();
             folderUpdates.DeletedFiles.Should().NotBeNull().And.BeEmpty();
             folderUpdates.UnchangedFiles.Should().NotBeNull().And.BeEmpty();
+            folderUpdates.UpdatedDirectories.Should().NotBeNull().And.BeEmpty();
+            folderUpdates.NewDirectories.Should().NotBeNull().And.BeEmpty();
+            folderUpdates.DeletedDirectories.Should().NotBeNull().And.BeEmpty();
+            folderUpdates.UnchangedDirectories.Should().NotBeNull().And.BeEmpty();
         }
 
         [Fact]

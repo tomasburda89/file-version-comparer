@@ -1,6 +1,5 @@
 ﻿using DTO;
 using System.Security.Cryptography;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Utils
 {
@@ -38,10 +37,10 @@ namespace Utils
             return (isValid, message);
         }
 
-        public FileVersionCheckerUtility(string folderPath)
+        public FileVersionCheckerUtility(string folderPath, bool? enableRecursive = null)
         {
             _folderPath = folderPath;
-            _enableRecursive = AppConfiguration.GetInstance().BrowseFolderRecursively;
+            _enableRecursive = enableRecursive ?? AppConfiguration.BrowseFolderRecursively;
         }
 
         /// <summary>
@@ -71,6 +70,18 @@ namespace Utils
             return updates;
         }
 
+        /// <summary>
+        /// Scans the current state of the folder and compares it with the previous state to
+        /// determine which files or directories are new, updated, deleted, or unchanged.
+        /// </summary>
+        /// <param name="files">A collection of FileDTO objects representing the previous state of the folder.</param>
+        /// <param name="deletedFiles">A list to store the files that have been deleted.</param>
+        /// <param name="newFiles">A list to store the new files.</param>
+        /// <param name="updatedFiles">A list to store the updated files.</param>
+        /// <param name="unchangedFiles">A list to store the unchanged files.</param>
+        /// <param name="previouslyExistingFileNames">A list of file names that existed in the previous state.</param>
+        /// <param name="itemsInfo">A collection of FileSystemInfo objects representing the current state of the folder.</param>
+        /// <param name="calculateHash">A boolean indicating whether to calculate the hash of each file.</param>
         private void ScanChanges(IEnumerable<FileDTO> files, List<FileDTO> deletedFiles, 
             IList<FileDTO> newFiles,
             IList<FileDTO> updatedFiles,

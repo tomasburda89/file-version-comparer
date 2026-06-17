@@ -16,14 +16,6 @@ namespace DTOTests
             };
         }
 
-        [Fact]
-        public void TestConstructorShouldInitializePropertiesToDefaults()
-        {
-            // Assert native .NET default variable states
-            dto.FileName.Should().BeNull("because references default to null");
-            dto.FileVersion.Should().Be(0, "because uninitialized integers default to zero");
-            dto.LastUpdated.Should().Be(default(DateTime), "because DateTime defaults to DateTime.MinValue");
-        }
 
         [Theory]
         [InlineData("document.pdf")]

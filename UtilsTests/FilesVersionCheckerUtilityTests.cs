@@ -208,7 +208,7 @@ namespace UtilsTests
             var previousState = new List<FileDTO>();
 
             // Act & Assert
-            FluentActions.Invoking(() => new FileVersionCheckerUtility(invalidPath).GetFolderUpdates(previousState, new List<FileDTO>()))
+            FluentActions.Invoking(() => new FileVersionCheckerUtility(invalidPath, true).GetFolderUpdates(previousState, new List<FileDTO>()))
                 .Should().Throw<DirectoryNotFoundException>();
         }
 
